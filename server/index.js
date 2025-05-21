@@ -7,17 +7,23 @@ const routes = require('./routes');
 
 const PORT = process.env.PORT || 3000;
 
-const server = http.createServer(async (req, res) => {
+const handleRequest = async (req, res) => {
   addCORS(res);
   if (req.method === 'OPTIONS') return res.writeHead(204).end();
   if (req.url.startsWith('/api/') && !authed(req)) {
     return send(res, 401, { error: 'Unauthorized' });
   }
+
   const url = new URL(req.url, `http://${req.headers.host}`);
-  const handler = routes[url.pathname];
-  if (handler) return handler(req, res);
+  const handler = routes[url.pathname] || handleNotFound;
+  return handler(req, res);
+};
+
+const handleNotFound = (req, res) => {
   send(res, 404, { error: 'Not found' });
-});
+};
+
+const server = http.createServer(handleRequest);
 
 server.listen(PORT, () => {
   console.log(`\u{1F680} API ready on http://localhost:${PORT}`);

@@ -9,6 +9,16 @@ class RateService {
     this.cache = { ts: 0, rates: [] };
   }
 
+  appendUAH = (rates) => [
+    ...rates,
+    { ccy: 'UAH', base_ccy: 'UAH', buy: '1', sale: '1' },
+  ];
+
+  updateCache = (rates) => {
+    this.cache = { ts: Date.now(), rates };
+    return rates;
+  };
+
   async fetchRates() {
     if (Date.now() - this.cache.ts < this.ttlMs) return this.cache.rates;
     const lib = this.apiUrl.protocol === 'https:' ? https : http;
@@ -20,16 +30,9 @@ class RateService {
           res.on('data', (chunk) => (raw += chunk));
           res.on('end', () => {
             try {
-              const arr = JSON.parse(raw);
-              const extra = {
-                ccy: 'UAH',
-                base_ccy: 'UAH',
-                buy: '1',
-                sale: '1',
-              };
-              const rates = [...arr, extra];
-              this.cache = { ts: Date.now(), rates };
-              resolve(rates);
+              const parsed = JSON.parse(raw);
+              const enriched = this.appendUAH(parsed);
+              resolve(this.updateCache.call(this, enriched));
             } catch (e) {
               reject(e);
             }
