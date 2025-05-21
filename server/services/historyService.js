@@ -1,9 +1,8 @@
 const MAX_HISTORY_LENGTH = 100;
 
-class HistoryService {
-  history = [];
-
+class HistoryService extends BaseCacheService {
   constructor() {
+    super();
     this.history = [];
   }
 
@@ -13,7 +12,6 @@ class HistoryService {
   }
 
   getAll() {
-    console.log(this.history);
     return this.history;
   }
 }

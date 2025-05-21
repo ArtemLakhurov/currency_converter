@@ -1,16 +1,15 @@
-const http = require('http');
-const https = require('https');
-const { URL } = require('url');
+const BaseCacheService = require('./baseService');
 
-class RateService {
+class RateService extends BaseCacheService {
   constructor(apiUrl, ttlMs) {
+    super();
     this.apiUrl = new URL(apiUrl);
     this.ttlMs = ttlMs;
-    this.cache = { ts: 0, rates: [] };
   }
 
   async fetchRates() {
-    if (Date.now() - this.cache.ts < this.ttlMs) return this.cache.rates;
+    if (this.isCacheValid(this.ttlMs)) return this.getCached();
+
     const lib = this.apiUrl.protocol === 'https:' ? https : http;
 
     return new Promise((resolve, reject) => {
@@ -28,8 +27,7 @@ class RateService {
                 sale: '1',
               };
               const rates = [...arr, extra];
-              this.cache = { ts: Date.now(), rates };
-              resolve(rates);
+              resolve(this.updateCache(rates));
             } catch (e) {
               reject(e);
             }
@@ -40,8 +38,4 @@ class RateService {
   }
 }
 
-module.exports = new RateService(
-  process.env.API_URL ||
-    'https://api.privatbank.ua/p24api/pubinfo?json&exchange&coursid=5',
-  10 * 60 * 1000
-);
+module.exports = RateService;
