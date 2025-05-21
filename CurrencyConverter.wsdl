@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://schemas.xmlsoap.org/wsdl/"
+             xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+             xmlns:xs="http://www.w3.org/2001/XMLSchema"
+             xmlns:tns="http://example.com/currencyconverter"
+             name="CurrencyConverterService"
+             targetNamespace="http://example.com/currencyconverter">
+
+    <!-- Типи даних -->
+    <types>
+        <xs:schema targetNamespace="http://example.com/currencyconverter">
+            <xs:element name="ConvertCurrencyRequest">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="from" type="xs:string"/>
+                        <xs:element name="to" type="xs:string"/>
+                        <xs:element name="amount" type="xs:decimal"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="ConvertCurrencyResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="convertedAmount" type="xs:decimal"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+        </xs:schema>
+    </types>
+
+    <!-- Порти -->
+    <message name="ConvertCurrencyInput">
+        <part name="parameters" element="tns:ConvertCurrencyRequest"/>
+    </message>
+    <message name="ConvertCurrencyOutput">
+        <part name="parameters" element="tns:ConvertCurrencyResponse"/>
+    </message>
+
+    <!-- Інтерфейс -->
+    <portType name="CurrencyConverterPortType">
+        <operation name="ConvertCurrency">
+            <input message="tns:ConvertCurrencyInput"/>
+            <output message="tns:ConvertCurrencyOutput"/>
+        </operation>
+    </portType>
+
+    <!-- Прив'язка -->
+    <binding name="CurrencyConverterSoapBinding" type="tns:CurrencyConverterPortType">
+        <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+        <operation name="ConvertCurrency">
+            <soap:operation soapAction="http://example.com/currencyconverter/ConvertCurrency"/>
+            <input>
+                <soap:body use="literal"/>
+            </input>
+            <output>
+                <soap:body use="literal"/>
+            </output>
+        </operation>
+    </binding>
+
+    <!-- Сервіс -->
+    <service name="CurrencyConverterService">
+        <port name="CurrencyConverterPort" binding="tns:CurrencyConverterSoapBinding">
+            <soap:address location="http://localhost:3000/convert"/>
+        </port>
+    </service>
+</definitions>
