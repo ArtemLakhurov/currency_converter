@@ -9,8 +9,12 @@ class RateService {
     this.cache = { ts: 0, rates: [] };
   }
 
+  isCacheValid() {
+    return Date.now() - this.cache.ts < this.ttlMs;
+  }
+
   async fetchRates() {
-    if (Date.now() - this.cache.ts < this.ttlMs) return this.cache.rates;
+    if (this.isCacheValid()) return this.cache.rates;
     const lib = this.apiUrl.protocol === 'https:' ? https : http;
 
     return new Promise((resolve, reject) => {

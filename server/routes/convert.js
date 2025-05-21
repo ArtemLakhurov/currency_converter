@@ -2,6 +2,10 @@ const { send, bodyJSON } = require('../utils/response');
 const RateService = require('../services/rateService');
 const HistoryService = require('../services/historyService');
 
+const isInvalidBatch = (batch) => !batch;
+const sendInvalidFormat = (res) =>
+  send(res, 400, { error: 'Bad input format' });
+
 module.exports = async (req, res) => {
   if (req.method !== 'POST')
     return send(res, 405, { error: 'Method Not Allowed' });
@@ -14,7 +18,7 @@ module.exports = async (req, res) => {
       ? [body]
       : null;
 
-    if (!batch) return send(res, 400, { error: 'Bad input format' });
+    if (isInvalidBatch(batch)) return sendInvalidFormat(res);
 
     const rates = await RateService.fetchRates();
     const results = batch.map(({ from, to, amount }) => {
